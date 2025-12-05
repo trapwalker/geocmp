@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>{title}</title>
+	
+	<!-- Leaflet CSS -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+	
+	<!-- Custom CSS -->
+	<style>
+{css}
+	</style>
+</head>
+<body>
+	<div id="tabs"></div>
+	<div id="info"></div>
+	<div id="map"></div>
+
+	<!-- jQuery (для совместимости со старым кодом, хотя здесь не обязателен) -->
+	<script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+	
+	<!-- Leaflet JS -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+
+	<!-- Custom JS -->
+	<script>
+{js}
+	</script>
+
+	<!-- GeoJSON Data and initialization -->
+	<script>
+		// Данные слоев встроены здесь
+		const layersData = {layers_json};
+		
+		// Инициализируем карту после загрузки страницы
+		window.addEventListener('load', function() {{
+			initMapWithLayers(layersData);
+		}});
+	</script>
+</body>
+</html>

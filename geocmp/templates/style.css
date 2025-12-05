@@ -1,0 +1,76 @@
+	body {
+		padding: 0;
+		margin: 0;
+		font-family: Arial, sans-serif;
+	}
+
+	html, body, #map {
+		height: 100%;
+	}
+
+	.leaflet-control-attribution {
+		display: none !important;
+	}
+
+	#tabs {
+		position: absolute;
+		top: 10px;
+		right: 10px;
+		z-index: 1000;
+		background: white;
+		border-radius: 5px;
+		box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+		display: flex;
+		gap: 5px;
+		padding: 5px;
+		flex-wrap: wrap;
+		max-width: 400px;
+	}
+
+	.tab {
+		padding: 10px 15px;
+		cursor: pointer;
+		border: 1px solid #ccc;
+		border-radius: 3px;
+		background: #f0f0f0;
+		user-select: none;
+		font-size: 14px;
+		white-space: nowrap;
+	}
+
+	.tab:hover {
+		background: #e0e0e0;
+	}
+
+	.tab.active {
+		background: #4CAF50;
+		color: white;
+		border-color: #4CAF50;
+	}
+
+	.simple-table {
+		border-collapse: collapse;
+		width: 100%;
+		font-size: 12px;
+	}
+
+	.simple-table td {
+		border: 1px solid #ddd;
+		padding: 8px;
+	}
+
+	.simple-table tr:nth-child(even) {
+		background-color: #f2f2f2;
+	}
+
+	#info {
+		position: absolute;
+		bottom: 10px;
+		left: 10px;
+		background: rgba(255,255,255,0.9);
+		padding: 10px 15px;
+		border-radius: 5px;
+		font-size: 12px;
+		max-width: 300px;
+		z-index: 999;
+	}
