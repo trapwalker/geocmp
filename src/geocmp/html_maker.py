@@ -1,4 +1,5 @@
 from . import geojson_tools
+from .i18n import _
 
 import os
 import json
@@ -17,8 +18,8 @@ TEMPLATE_JS = TEMPLATES_PATH / 'map.js'
 
 def make_layers_data_list(geojson_paths: list[Path]) -> list[dict]:
 	"""
-	Загружает, валидирует и стилизует все GeoJSON файлы.
-	Возвращает список слоев (может быть пустой если все файлы невалидны).
+	Load, validate and stylize all GeoJSON files.
+	Returns list of layers (can be empty if all files are invalid).
 	"""
 	layers_data = []
 
@@ -30,14 +31,14 @@ def make_layers_data_list(geojson_paths: list[Path]) -> list[dict]:
 			with geojson_path.open(encoding='utf-8') as f:
 				geojson_data = json.load(f)
 		except FileNotFoundError as e:
-			logger.warning(f"Не удаётся прочитать {geojson_path}: {e}")
+			logger.warning(_("Cannot read %s: %s"), geojson_path, e)
 			continue
 		except json.decoder.JSONDecodeError as e:
-			logger.warning(f"Некорректный формат файла {geojson_path}: {e}")
+			logger.warning(_("Invalid file format %s: %s"), geojson_path, e)
 			continue
 
 		if not geojson_tools.is_valid_feature_collection(geojson_data):
-			logger.warning('Некорректный формат GeoJSON: %s', geojson_path)
+			logger.warning(_('Invalid GeoJSON format: %s'), geojson_path)
 			continue
 
 		map(geojson_tools.update_styles, geojson_data.get('features', []))

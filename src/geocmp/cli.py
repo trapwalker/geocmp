@@ -69,33 +69,33 @@ def main(
     setup_logging(verbose)
 
     try:
-        logger.debug(f"Получены пути к GeoJSON в параметрах ({len(patterns)}):{ITEMDIV}{ITEMDIV.join(patterns)}")
+        logger.debug(_("Received GeoJSON paths in arguments (%d):%s%s"), len(patterns), ITEMDIV, ITEMDIV.join(patterns))
         geojson_paths = expand_globs(patterns)
-        logger.debug(f"Документы к сравнению ({len(geojson_paths)}):{ITEMDIV}{ITEMDIV.join(map(str, geojson_paths))}")
+        logger.debug(_("Documents to compare (%d):%s%s"), len(geojson_paths), ITEMDIV, ITEMDIV.join(map(str, geojson_paths)))
 
         html_content = generate_html(geojson_paths, title=title, ext_css=ext_css, ext_js=ext_js)
 
         if out:
-            logger.debug("Сохранение результата в файл: %s", out)
+            logger.debug(_("Saving result to file: %s"), out)
         elif open_browser:
             with tempfile.NamedTemporaryFile(mode='w', suffix='.html', prefix='geocmp_', delete=False) as temp_file:
                 out = Path(temp_file.name)
-            logger.debug("Сохранение во временный файл: %s", out)
+            logger.debug(_("Saving to temporary file: %s"), out)
 
         if out is None:
-            logger.debug("Вывод в stdout")
+            logger.debug(_("Output to stdout"))
             print(html_content)
         else:
             out.write_text(html_content)
             if open_browser:
-                logger.debug("Открытие в браузере: %s", out)
+                logger.debug(_("Opening in browser: %s"), out)
                 webbrowser.open(f'file://{out.resolve()}')
 
     except KeyboardInterrupt:
-        print("\nOperation interrupted by user (Ctrl-C)", file=sys.stderr)
+        print(_("\nOperation interrupted by user (Ctrl-C)"), file=sys.stderr)
         raise typer.Exit(code=130)
     except Exception as e:
-        print(f"Fatal error: {e}", file=sys.stderr)
+        print(_("Fatal error: %s") % e, file=sys.stderr)
         if verbose:
             traceback.print_exc()
         raise typer.Exit(code=2)

@@ -156,9 +156,10 @@ geocmp -b region1.geojson region2.geojson
 
 ## Требования
 
-- Python >= 3.9
-- Стандартная библиотека Python (нет внешних зависимостей для работы утилиты)
+- Python >= 3.10
+- Минимальные зависимости (typer, xxhash, natsort)
 - Браузер с поддержкой JavaScript для просмотра результата
+- `msgfmt` (gettext tools) - для компиляции переводов (опционально)
 
 ## Разработка
 
@@ -184,23 +185,42 @@ pytest
 black src/geocmp/
 ```
 
+### Работа с переводами
+
+Все пользовательские сообщения автоматически переводятся на язык системы (если доступен перевод).
+
+Компиляция переводов:
+```bash
+./scripts/compile_translations.sh
+```
+
+Подробнее см. [locales/README.md](locales/README.md)
+
 ## Структура проекта
 
 ```
-src/
-└── geocmp/
-    ├── __init__.py          - Пакет
-    ├── __main__.py          - Точка входа CLI
-    ├── cli.py               - CLI интерфейс (Typer)
-    ├── geojson_tools.py     - Валидация и стилизация GeoJSON
-    ├── glob_expander.py     - Обработка glob-паттернов
-    ├── html_maker.py        - Генерация HTML
-    ├── i18n.py              - Интернационализация
-    ├── utils.py             - Вспомогательные функции
-    └── templates/           - Шаблоны для HTML
-        ├── template.html    - HTML-шаблон
-        ├── style.css        - Стили карты
-        └── map.js           - Логика карты и переключения слоев
+geocmp/
+├── src/
+│   └── geocmp/
+│       ├── __init__.py          - Пакет
+│       ├── __main__.py          - Точка входа CLI
+│       ├── cli.py               - CLI интерфейс (Typer)
+│       ├── geojson_tools.py     - Валидация и стилизация GeoJSON
+│       ├── glob_expander.py     - Обработка glob-паттернов
+│       ├── html_maker.py        - Генерация HTML
+│       ├── i18n.py              - Интернационализация
+│       ├── utils.py             - Вспомогательные функции
+│       └── templates/           - Шаблоны для HTML
+│           ├── template.html    - HTML-шаблон
+│           ├── style.css        - Стили карты
+│           └── map.js           - Логика карты и переключения слоев
+├── locales/                     - Переводы
+│   └── ru_RU/
+│       └── LC_MESSAGES/
+│           ├── geocmp.po        - Русский перевод (исходник)
+│           └── geocmp.mo        - Скомпилированный перевод
+└── scripts/
+    └── compile_translations.sh  - Компиляция переводов
 ```
 
 ## Лицензия

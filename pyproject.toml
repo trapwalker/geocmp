@@ -34,6 +34,10 @@ geocmp = "geocmp.cli:app"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/geocmp"]
+include = [
+    "locales/**/*.mo",
+    "locales/**/*.po",
+]
 
 [tool.black]
 line-length = 100

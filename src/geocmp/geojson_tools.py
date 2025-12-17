@@ -1,10 +1,11 @@
 from typing import Callable, Any, Dict
 import logging
+from .i18n import _
 
 logger = logging.getLogger(__name__)
 
 
-# Стратегии преобразования свойств в стили
+# Property to style mapping strategies
 _PROPERTY_MAPPERS: Dict[str, Callable[[Any], dict[str, Any]]] = {
 	'marker-color': lambda v: {'color': v},
 	'fill': lambda v: {'fillColor': v},
@@ -16,7 +17,7 @@ _PROPERTY_MAPPERS: Dict[str, Callable[[Any], dict[str, Any]]] = {
 
 def update_styles(feature: Dict[str, Any]) -> None:
 	"""
-	Применяет стили к одной фиче (мутирует входное значение).
+	Apply styles to a feature (mutates input value).
 	"""
 	nothing_to_do = lambda _: {}
 	style = feature.setdefault('style', {})
@@ -25,11 +26,11 @@ def update_styles(feature: Dict[str, Any]) -> None:
 		try:
 			style.update(_PROPERTY_MAPPERS.get(prop_key, nothing_to_do)(prop_value))
 		except (ValueError, TypeError) as e:
-			logger.warning(f"Не удаётся обработать параметр стиля {prop_key}={prop_value!r}: {e}")
+			logger.warning(_("Cannot process style parameter %s=%r: %s"), prop_key, prop_value, e)
 
 
 def is_valid_feature_collection(geojson_data: dict) -> bool:
-	"""Проверяет, является ли объект валидной FeatureCollection."""
+	"""Check if object is a valid FeatureCollection."""
 	if not isinstance(geojson_data, dict):
 		return False
 	if geojson_data.get('type') != 'FeatureCollection':

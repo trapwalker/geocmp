@@ -1,0 +1,57 @@
+# Russian translations for geocmp.
+# Copyright (C) 2025
+# This file is distributed under the same license as the geocmp package.
+# Sergey Pankov <svpmailbox@gmail.com>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: geocmp 0.1.0\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2025-01-15 12:00+0000\n"
+"PO-Revision-Date: 2025-01-15 12:00+0000\n"
+"Last-Translator: Sergey Pankov <svpmailbox@gmail.com>\n"
+"Language-Team: Russian\n"
+"Language: ru_RU\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+
+# cli.py
+msgid "Received GeoJSON paths in arguments (%d):%s%s"
+msgstr "Получены пути к GeoJSON в параметрах (%d):%s%s"
+
+msgid "Documents to compare (%d):%s%s"
+msgstr "Документы к сравнению (%d):%s%s"
+
+msgid "Saving result to file: %s"
+msgstr "Сохранение результата в файл: %s"
+
+msgid "Saving to temporary file: %s"
+msgstr "Сохранение во временный файл: %s"
+
+msgid "Output to stdout"
+msgstr "Вывод в stdout"
+
+msgid "Opening in browser: %s"
+msgstr "Открытие в браузере: %s"
+
+msgid "\nOperation interrupted by user (Ctrl-C)"
+msgstr "\nОперация прервана пользователем (Ctrl-C)"
+
+msgid "Fatal error: %s"
+msgstr "Критическая ошибка: %s"
+
+# html_maker.py
+msgid "Cannot read %s: %s"
+msgstr "Не удаётся прочитать %s: %s"
+
+msgid "Invalid file format %s: %s"
+msgstr "Некорректный формат файла %s: %s"
+
+msgid "Invalid GeoJSON format: %s"
+msgstr "Некорректный формат GeoJSON: %s"
+
+# geojson_tools.py
+msgid "Cannot process style parameter %s=%r: %s"
+msgstr "Не удаётся обработать параметр стиля %s=%r: %s"
