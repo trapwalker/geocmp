@@ -173,22 +173,26 @@ pytest
 ### Форматирование кода
 
 ```bash
-black geocmp/
+black src/geocmp/
 ```
 
 ## Структура проекта
 
 ```
-geocmp/
-├── __init__.py          - Пакет
-├── __main__.py          - Точка входа CLI
-├── geojson_tools.py     - Валидация и стилизация GeoJSON
-├── glob_expander.py     - Обработка glob-паттернов
-├── html_maker.py        - Генерация HTML
-└── templates/           - Шаблоны для HTML
-    ├── template.html    - HTML-шаблон
-    ├── style.css        - Стили карты
-    └── map.js           - Логика карты и переключения слоев
+src/
+└── geocmp/
+    ├── __init__.py          - Пакет
+    ├── __main__.py          - Точка входа CLI
+    ├── cli.py               - CLI интерфейс (Typer)
+    ├── geojson_tools.py     - Валидация и стилизация GeoJSON
+    ├── glob_expander.py     - Обработка glob-паттернов
+    ├── html_maker.py        - Генерация HTML
+    ├── i18n.py              - Интернационализация
+    ├── utils.py             - Вспомогательные функции
+    └── templates/           - Шаблоны для HTML
+        ├── template.html    - HTML-шаблон
+        ├── style.css        - Стили карты
+        └── map.js           - Логика карты и переключения слоев
 ```
 
 ## Лицензия

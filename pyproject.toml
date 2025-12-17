@@ -1,30 +1,24 @@
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
 [project]
 name = "geocmp"
 version = "0.1.0"
-description = "GeoJSONuv files comparer"
+description = "GeoJSON files comparer"
 readme = "README.md"
-requires-python = ">=3.9"
-license = {text = "MIT"}
 authors = [
-    {name = "Your Name", email = "your.email@example.com"}
+    { name = "Sergey Pankov", email = "svpmailbox@gmail.com" }
 ]
+requires-python = ">=3.10"
+dependencies = [
+    "typer>=0.12.0",
+    "rich>=13.7.0",
+    "xxhash>=3.4.0",
+    "natsort>=8.4.0",
+]
+
+license = {text = "MIT"}
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Topic :: Scientific/Engineering :: GIS",
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-]
-
-dependencies = [
 ]
 
 [project.optional-dependencies]
@@ -37,21 +31,21 @@ dev = [
 ]
 
 [project.scripts]
-geocmp = "geocmp.__main__:main"
+geocmp = "geocmp.cli:app"
 
 [tool.hatch.build.targets.wheel]
-packages = ["geocmp"]
+packages = ["src/geocmp"]
 
 [tool.black]
 line-length = 100
-target-version = ["py39", "py310", "py311", "py312"]
+target-version = ["py310", "py311", "py312"]
 
 [tool.isort]
 profile = "black"
 line_length = 100
 
 [tool.mypy]
-python_version = "3.9"
+python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
@@ -63,8 +57,13 @@ python_classes = "Test*"
 python_functions = "test_*"
 addopts = "-v --cov=geocmp --cov-report=term-missing"
 
+
 [dependency-groups]
 dev = [
     "pytest>=8.4.2",
     "pytest-cov>=7.0.0",
 ]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

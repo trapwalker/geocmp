@@ -1,4 +1,4 @@
-from geocmp import geojson_tools
+from . import geojson_tools
 
 import os
 import json
