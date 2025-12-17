@@ -1,14 +1,12 @@
-"""Command-line interface for massunpacker."""
+"""Command-line interface for geocmp."""
 
 import logging
 import sys
+import traceback
 from pathlib import Path
 from typing import Optional
 
 import typer
-from rich.console import Console
-from rich.logging import RichHandler
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn, TimeRemainingColumn
 from .i18n import _, setup_i18n
 
 from .glob_expander import expand_globs
@@ -20,42 +18,28 @@ logger = logging.getLogger(__name__)
 ITEMDIV = '\n\t'
 
 app = typer.Typer(help="Geocmp utility for compare GIS-files on the map")
-console = Console()
-err_console = Console(stderr=True)
 
 
 def setup_logging(verbose: bool = False) -> None:
     """
-    Setup logging with rich handler.
+    Setup logging with standard handlers.
 
     Args:
         verbose: Enable debug logging
     """
-    # LOG_FORMAT = "[%(levelname)s] %(message)s"
     level = logging.DEBUG if verbose else logging.INFO
-    logging.basicConfig(
-        level=level,
-        format="%(message)s",
-        handlers=[
-            RichHandler(
-                console=err_console,
-                show_time=False,
-                show_path=False,
-                markup=True,
-                rich_tracebacks=True,
-            )
-        ],
-    )
+    formatter = logging.Formatter('%(levelname)s: %(message)s')
+    info_handler = logging.StreamHandler(sys.stderr)
+    info_handler.setLevel(level)
+    info_handler.setFormatter(formatter)
+    info_handler.addFilter(lambda record: record.levelno < logging.WARNING)
 
-    error_handler = RichHandler(
-        console=err_console,
-        show_time=True,
-        show_path=False,
-        markup=True,
-        rich_tracebacks=True,
-    )
+    error_formatter = logging.Formatter('%(asctime)s - %(levelname)s: %(message)s')
+    error_handler = logging.StreamHandler(sys.stderr)
     error_handler.setLevel(logging.WARNING)
-    logging.getLogger().addHandler(error_handler)
+    error_handler.setFormatter(error_formatter)
+
+    logging.basicConfig(level=level, handlers=[info_handler, error_handler])
 
 
 @app.command()
@@ -90,17 +74,17 @@ def main(
         html_content = generate_html(geojson_paths, title=title, ext_css=ext_css, ext_js=ext_js)
         if out is None:
             logger.debug("Вывод в stdout")
-            console.print(html_content)
+            print(html_content)
         else:
             logger.debug("Сохранение результата в файл: %s", out)
             out.write_text(html_content)
     except KeyboardInterrupt:
-        err_console.print("\n[red]Operation interrupted by user (Ctrl-C)[/red]")
+        print("\nOperation interrupted by user (Ctrl-C)", file=sys.stderr)
         raise typer.Exit(code=130)
     except Exception as e:
-        err_console.print(f"[red]Fatal error: {e}[/red]")
+        print(f"Fatal error: {e}", file=sys.stderr)
         if verbose:
-            console.print_exception()
+            traceback.print_exc()
         raise typer.Exit(code=2)
 
 
