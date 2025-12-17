@@ -163,38 +163,69 @@ geocmp -b region1.geojson region2.geojson
 
 ## Разработка
 
-### Установка для разработки
+### Быстрый старт для разработчиков
+
+Проект использует Makefile для упрощения разработки:
 
 ```bash
-# Установить с зависимостями для разработки
-uv pip install -e ".[dev]"
+# Показать все доступные команды
+make help
 
-# Или используя dependency groups (uv)
-uv pip install -e . --group dev
+# Полная настройка окружения разработчика
+make dev-setup
+
+# Или по шагам:
+make install-dev              # Установить в режиме разработчика
+make compile-translations     # Скомпилировать переводы
 ```
 
-### Запуск тестов
+### Основные команды Make
 
 ```bash
-pytest
-```
-
-### Форматирование кода
-
-```bash
-black src/geocmp/
+make install-dev              # Установка в режиме разработчика с dev зависимостями
+make sync                     # Синхронизация зависимостей (uv sync)
+make compile-translations     # Компиляция файлов переводов (.po -> .mo)
+make format                   # Форматирование кода (black)
+make format-check             # Проверка форматирования без изменений
+make lint                     # Проверка кода (flake8, mypy)
+make test                     # Запуск тестов
+make test-cov                 # Запуск тестов с отчетом о покрытии
+make clean                    # Очистка временных файлов
+make build                    # Сборка пакета
+make check                    # Запуск всех проверок (format-check, lint, test)
+make all                      # Полный цикл: clean, compile, format, lint, test
 ```
 
 ### Работа с переводами
 
 Все пользовательские сообщения автоматически переводятся на язык системы (если доступен перевод).
 
-Компиляция переводов:
+Компиляция переводов (кросс-платформенно):
 ```bash
-./scripts/compile_translations.sh
+make compile-translations
+# или напрямую
+python scripts/compile_translations.py
 ```
 
 Подробнее см. [locales/README.md](locales/README.md)
+
+### Без использования Make
+
+Если Make недоступен, можно использовать команды напрямую:
+
+```bash
+# Установка для разработки
+uv pip install -e . --group dev
+
+# Компиляция переводов
+python scripts/compile_translations.py
+
+# Форматирование
+black src/geocmp/
+
+# Тесты
+pytest
+```
 
 ## Структура проекта
 
@@ -215,13 +246,21 @@ geocmp/
 │           ├── style.css        - Стили карты
 │           └── map.js           - Логика карты и переключения слоев
 ├── locales/                     - Переводы
+│   ├── README.md                - Документация по переводам
 │   └── ru_RU/
 │       └── LC_MESSAGES/
 │           ├── geocmp.po        - Русский перевод (исходник)
 │           └── geocmp.mo        - Скомпилированный перевод
-└── scripts/
-    └── compile_translations.sh  - Компиляция переводов
+├── scripts/
+│   ├── compile_translations.py  - Компиляция переводов (Python)
+│   └── compile_translations.sh  - Компиляция переводов (Bash)
+├── Makefile                     - Задачи для разработки
+└── pyproject.toml               - Конфигурация проекта
 ```
+
+## Участие в разработке
+
+См. [CONTRIBUTING.md](CONTRIBUTING.md) для информации о том, как внести вклад в проект.
 
 ## Лицензия
 
@@ -229,4 +268,4 @@ MIT
 
 ## Автор
 
-Your Name <your.email@example.com>
+Sergey Pankov <svpmailbox@gmail.com>

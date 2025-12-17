@@ -23,6 +23,10 @@ locales/
 
 2. Compile the `.po` file to `.mo`:
    ```bash
+   make compile-translations
+   # or directly
+   python scripts/compile_translations.py
+   # or manually
    msgfmt locales/ru_RU/LC_MESSAGES/geocmp.po -o locales/ru_RU/LC_MESSAGES/geocmp.mo
    ```
 
@@ -42,7 +46,7 @@ locales/
 
 4. Compile:
    ```bash
-   msgfmt locales/<LANG_CODE>/LC_MESSAGES/geocmp.po -o locales/<LANG_CODE>/LC_MESSAGES/geocmp.mo
+   make compile-translations
    ```
 
 ## Format
