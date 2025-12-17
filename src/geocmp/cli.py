@@ -2,7 +2,9 @@
 
 import logging
 import sys
+import tempfile
 import traceback
+import webbrowser
 from pathlib import Path
 from typing import Optional
 
@@ -72,12 +74,23 @@ def main(
         logger.debug(f"Документы к сравнению ({len(geojson_paths)}):{ITEMDIV}{ITEMDIV.join(map(str, geojson_paths))}")
 
         html_content = generate_html(geojson_paths, title=title, ext_css=ext_css, ext_js=ext_js)
+
+        if out:
+            logger.debug("Сохранение результата в файл: %s", out)
+        elif open_browser:
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.html', prefix='geocmp_', delete=False) as temp_file:
+                out = Path(temp_file.name)
+            logger.debug("Сохранение во временный файл: %s", out)
+
         if out is None:
             logger.debug("Вывод в stdout")
             print(html_content)
         else:
-            logger.debug("Сохранение результата в файл: %s", out)
             out.write_text(html_content)
+            if open_browser:
+                logger.debug("Открытие в браузере: %s", out)
+                webbrowser.open(f'file://{out.resolve()}')
+
     except KeyboardInterrupt:
         print("\nOperation interrupted by user (Ctrl-C)", file=sys.stderr)
         raise typer.Exit(code=130)

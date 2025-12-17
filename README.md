@@ -52,7 +52,9 @@ options:
   -h, --help            Показать справку
   -v, --verbose         Включить подробное логирование (DEBUG)
   -o OUT, --out OUT     Путь к файлу для сохранения результата (по умолчанию stdout)
-  --title TITLE         Заголовок HTML-документа (по умолчанию формируется автоматически)
+  -b, --open-browser    Открыть результат в браузере
+  -t TITLE, --title TITLE
+                        Заголовок HTML-документа (по умолчанию формируется автоматически)
   --ext_css EXT_CSS     Путь к дополнительному CSS-файлу
   --ext_js EXT_JS       Путь к дополнительному JS-файлу
 ```
@@ -71,6 +73,12 @@ geocmp --title "Сравнение регионов" -o map.html region1.geojson
 
 # Использовать рекурсивный поиск
 geocmp -o all_data.html "data/**/*.geojson"
+
+# Открыть результат в браузере сразу после генерации
+geocmp -o map.html -b region1.geojson region2.geojson
+
+# Открыть во временном файле (без сохранения)
+geocmp -b region1.geojson region2.geojson
 ```
 
 ## Управление интерактивной картой
