@@ -17,7 +17,42 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
 
-# cli.py
+# cli.py - Main app help
+msgid "Geocmp utility for compare GIS-files on the map"
+msgstr "Утилита Geocmp для сравнения GIS-файлов на карте"
+
+# cli.py - Command help
+msgid ""
+"A utility for creating an interactive HTML map that allows rapid switching "
+"between multiple GeoJSON files for visual comparison. "
+"The tool generates a single HTML file with a layer control panel to toggle between datasets."
+msgstr ""
+"Утилита для создания интерактивной HTML-карты, позволяющей быстро переключаться "
+"между несколькими GeoJSON-файлами для визуального сравнения. "
+"Инструмент генерирует единый HTML-файл с панелью управления слоями для переключения между наборами данных."
+
+# cli.py - Arguments and options
+msgid "Glob pattern(s) or GeoJSON file(s) (e.g., 'data/*.geojson' or file1.geojson file2.geojson)"
+msgstr "Шаблон(ы) Glob или файл(ы) GeoJSON (например, 'data/*.geojson' или file1.geojson file2.geojson)"
+
+msgid "Output file path (default: STDOUT)"
+msgstr "Путь к выходному файлу (по умолчанию: STDOUT)"
+
+msgid "Enable verbose logging"
+msgstr "Включить подробное логирование"
+
+msgid "Title of output file"
+msgstr "Заголовок выходного файла"
+
+msgid "Open in browser"
+msgstr "Открыть в браузере"
+
+msgid "Path to extra CSS"
+msgstr "Путь к дополнительному CSS"
+
+msgid "Path to extra JS code"
+msgstr "Путь к дополнительному JS-коду"
+
 msgid "Received GeoJSON paths in arguments (%d):%s%s"
 msgstr "Получены пути к GeoJSON в параметрах (%d):%s%s"
 

@@ -209,6 +209,10 @@ python scripts/compile_translations.py
 
 Подробнее см. [locales/README.md](locales/README.md)
 
+Документация:
+- Быстрое руководство: [docs/i18n-quick-guide.md](docs/i18n-quick-guide.md)
+- Подробная информация: [docs/i18n-typer.md](docs/i18n-typer.md)
+
 ### Без использования Make
 
 Если Make недоступен, можно использовать команды напрямую:
@@ -258,6 +262,9 @@ geocmp/
 ├── scripts/
 │   ├── compile_translations.py  - Компиляция переводов (Python)
 │   └── compile_translations.sh  - Компиляция переводов (Bash)
+├── docs/
+│   ├── i18n-quick-guide.md      - Быстрое руководство по i18n
+│   └── i18n-typer.md            - Подробная документация по i18n в Typer
 ├── Makefile                     - Задачи для разработки
 └── pyproject.toml               - Конфигурация проекта
 ```

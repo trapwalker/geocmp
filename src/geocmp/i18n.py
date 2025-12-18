@@ -3,7 +3,10 @@
 import gettext
 import locale
 from pathlib import Path
+import logging
 
+
+logger = logging.getLogger(__name__)
 _translator: gettext.NullTranslations = None  # type: ignore
 
 
@@ -24,11 +27,13 @@ def setup_i18n(
         localedir = Path(__file__).parent.parent.parent / "locales"
 
     if lang is None:
+        logger.debug("Try to get system locale...")
         try:
-            # Try to get system locale
             lang, _ = locale.getdefaultlocale()
-        except Exception:
+            logger.debug("Use system locale %s", lang)
+        except Exception as e:
             lang = "en_US"
+            logger.debug("Fall back to default locale %s because %s", lang, e)
 
     # Fallback to English if locale not found
     try:

@@ -19,7 +19,8 @@ logger = logging.getLogger(__name__)
 
 ITEMDIV = "\n\t"
 
-app = typer.Typer(help="Geocmp utility for compare GIS-files on the map")
+setup_i18n()
+app = typer.Typer(help=_("Geocmp utility for compare GIS-files on the map"))
 
 
 def setup_logging(verbose: bool = False) -> None:
@@ -44,31 +45,32 @@ def setup_logging(verbose: bool = False) -> None:
     logging.basicConfig(level=level, handlers=[info_handler, error_handler])
 
 
-@app.command()
+@app.command(
+    help=_(
+        "A utility for creating an interactive HTML map that allows rapid switching "
+        "between multiple GeoJSON files for visual comparison. "
+        "The tool generates a single HTML file with a layer control panel to toggle between datasets."
+    )
+)
 def main(
     patterns: list[str] = typer.Argument(
         ...,
-        help="Glob pattern(s) or GeoJSON file(s) (e.g., 'data/*.geojson' or file1.geojson file2.geojson)",
+        help=_("Glob pattern(s) or GeoJSON file(s) (e.g., 'data/*.geojson' or file1.geojson file2.geojson)"),
     ),
     out: Optional[Path] = typer.Option(
-        None, "--out", "-o", help="Output file path (default: STDOUT)"
+        None, "--out", "-o", help=_("Output file path (default: STDOUT)")
     ),
-    verbose: bool = typer.Option(False, "--verbose", "-v", help="Enable verbose logging"),
-    title: str = typer.Option(None, "--title", "-t", help="Title of output file"),
-    open_browser: bool = typer.Option(False, "--open-browser", "-b", help="Open in browser"),
-    ext_css: Path = typer.Option(None, "--ext-css", help="Path to extra CSS"),
-    ext_js: Path = typer.Option(None, "--ext-js", help="Path to extra JS code"),
+    verbose: bool = typer.Option(False, "--verbose", "-v", help=_("Enable verbose logging")),
+    title: str = typer.Option(None, "--title", "-t", help=_("Title of output file")),
+    open_browser: bool = typer.Option(False, "--open-browser", "-b", help=_("Open in browser")),
+    ext_css: Path = typer.Option(None, "--ext-css", help=_("Path to extra CSS")),
+    ext_js: Path = typer.Option(None, "--ext-js", help=_("Path to extra JS code")),
 ) -> None:
-    """
-    A utility for creating an interactive HTML map that allows rapid switching between multiple GeoJSON files for visual comparison.
-    The tool generates a single HTML file with a layer control panel to toggle between datasets.
+    """Main command entry point.
 
-    Examples:
-        geocmp "data/*.Geojson" --out=comparsion.html
-        geocmp *.example_[abc].geojson
-        geocmp file1.geojson file2.geojson file3.geojson
+    Note: The user-facing help text is localized via @app.command(help=...).
+    This docstring is for code documentation only.
     """
-    setup_i18n()
     setup_logging(verbose)
 
     try:
