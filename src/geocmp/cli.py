@@ -17,7 +17,7 @@ from .html_maker import generate_html
 
 logger = logging.getLogger(__name__)
 
-ITEMDIV = '\n\t'
+ITEMDIV = "\n\t"
 
 app = typer.Typer(help="Geocmp utility for compare GIS-files on the map")
 
@@ -30,13 +30,13 @@ def setup_logging(verbose: bool = False) -> None:
         verbose: Enable debug logging
     """
     level = logging.DEBUG if verbose else logging.INFO
-    formatter = logging.Formatter('%(levelname)s: %(message)s')
+    formatter = logging.Formatter("%(levelname)s: %(message)s")
     info_handler = logging.StreamHandler(sys.stderr)
     info_handler.setLevel(level)
     info_handler.setFormatter(formatter)
     info_handler.addFilter(lambda record: record.levelno < logging.WARNING)
 
-    error_formatter = logging.Formatter('%(asctime)s - %(levelname)s: %(message)s')
+    error_formatter = logging.Formatter("%(asctime)s - %(levelname)s: %(message)s")
     error_handler = logging.StreamHandler(sys.stderr)
     error_handler.setLevel(logging.WARNING)
     error_handler.setFormatter(error_formatter)
@@ -46,7 +46,10 @@ def setup_logging(verbose: bool = False) -> None:
 
 @app.command()
 def main(
-    patterns: list[str] = typer.Argument(..., help="Glob pattern(s) or GeoJSON file(s) (e.g., 'data/*.geojson' or file1.geojson file2.geojson)"),
+    patterns: list[str] = typer.Argument(
+        ...,
+        help="Glob pattern(s) or GeoJSON file(s) (e.g., 'data/*.geojson' or file1.geojson file2.geojson)",
+    ),
     out: Optional[Path] = typer.Option(
         None, "--out", "-o", help="Output file path (default: STDOUT)"
     ),
@@ -69,16 +72,28 @@ def main(
     setup_logging(verbose)
 
     try:
-        logger.debug(_("Received GeoJSON paths in arguments (%d):%s%s"), len(patterns), ITEMDIV, ITEMDIV.join(patterns))
+        logger.debug(
+            _("Received GeoJSON paths in arguments (%d):%s%s"),
+            len(patterns),
+            ITEMDIV,
+            ITEMDIV.join(patterns),
+        )
         geojson_paths = expand_globs(patterns)
-        logger.debug(_("Documents to compare (%d):%s%s"), len(geojson_paths), ITEMDIV, ITEMDIV.join(map(str, geojson_paths)))
+        logger.debug(
+            _("Documents to compare (%d):%s%s"),
+            len(geojson_paths),
+            ITEMDIV,
+            ITEMDIV.join(map(str, geojson_paths)),
+        )
 
         html_content = generate_html(geojson_paths, title=title, ext_css=ext_css, ext_js=ext_js)
 
         if out:
             logger.debug(_("Saving result to file: %s"), out)
         elif open_browser:
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.html', prefix='geocmp_', delete=False) as temp_file:
+            with tempfile.NamedTemporaryFile(
+                mode="w", suffix=".html", prefix="geocmp_", delete=False
+            ) as temp_file:
                 out = Path(temp_file.name)
             logger.debug(_("Saving to temporary file: %s"), out)
 
@@ -89,7 +104,7 @@ def main(
             out.write_text(html_content)
             if open_browser:
                 logger.debug(_("Opening in browser: %s"), out)
-                webbrowser.open(f'file://{out.resolve()}')
+                webbrowser.open(f"file://{out.resolve()}")
 
     except KeyboardInterrupt:
         print(_("\nOperation interrupted by user (Ctrl-C)"), file=sys.stderr)
