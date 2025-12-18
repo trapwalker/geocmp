@@ -21,7 +21,7 @@ If `make` is not available:
 
 ```bash
 # Install in development mode
-uv pip install -e . --group dev
+uv pip install -e ".[dev]"
 
 # Compile translations
 python scripts/compile_translations.py

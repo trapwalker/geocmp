@@ -1,0 +1,17 @@
+[flake8]
+max-line-length = 130
+# W191: indentation contains tabs (we use tabs per .editorconfig)
+# E117: over-indented (conflicts with tabs)
+# E501: line too long (docstrings and help text are exempt)
+# E731: lambda assignment (acceptable for simple mappers)
+# E241: multiple spaces after ':' (alignment)
+# F824: global unused (needed for gettext pattern)
+ignore = W191,E117,E501,E731,E241,F824
+exclude =
+    .git,
+    __pycache__,
+    .venv,
+    venv,
+    build,
+    dist,
+    *.egg-info

@@ -17,7 +17,7 @@ install: ## Install package in production mode
 	$(UV) pip install .
 
 install-dev: ## Install package in development mode with dev dependencies
-	$(UV) pip install -e . --group dev
+	$(UV) pip install -e ".[dev]"
 
 sync: ## Sync dependencies (uv sync)
 	$(UV) sync
@@ -26,20 +26,20 @@ compile-translations: ## Compile translation files (.po -> .mo)
 	$(PYTHON) scripts/compile_translations.py
 
 format: ## Format code with black
-	black $(SRC_DIR)
+	$(UV) run black $(SRC_DIR)
 
 format-check: ## Check code formatting without changes
-	black --check $(SRC_DIR)
+	$(UV) run black --check $(SRC_DIR)
 
-lint: ## Run code linters (flake8, mypy)
+lint: ## Run code linters (mypy, flake8)
 	$(UV) run flake8 $(SRC_DIR)
 	$(UV) run mypy $(SRC_DIR)
 
 test: ## Run tests with pytest
-	pytest
+	$(UV) run pytest
 
 test-cov: ## Run tests with coverage report
-	pytest --cov=$(SRC_DIR) --cov-report=html --cov-report=term
+	$(UV) run pytest --cov=$(SRC_DIR) --cov-report=html --cov-report=term
 
 clean: ## Clean build artifacts and temporary files
 	rm -rf build/

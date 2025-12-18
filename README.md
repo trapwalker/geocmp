@@ -215,16 +215,20 @@ python scripts/compile_translations.py
 
 ```bash
 # Установка для разработки
-uv pip install -e . --group dev
+uv pip install -e ".[dev]"
 
 # Компиляция переводов
 python scripts/compile_translations.py
 
 # Форматирование
-black src/geocmp/
+uv run black src/geocmp/
+
+# Линтеры
+uv run flake8 src/geocmp/
+uv run mypy src/geocmp/
 
 # Тесты
-pytest
+uv run pytest
 ```
 
 ## Структура проекта
