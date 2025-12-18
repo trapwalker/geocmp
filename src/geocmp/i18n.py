@@ -5,7 +5,7 @@ import locale
 from pathlib import Path
 
 # Global translator
-_translator: gettext.NullTranslations | None = None
+_translator: gettext.NullTranslations = None  # type: ignore
 
 
 def setup_i18n(domain: str = "geocmp", localedir: Path | None = None) -> None:

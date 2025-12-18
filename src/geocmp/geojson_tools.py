@@ -19,7 +19,9 @@ def update_styles(feature: Dict[str, Any]) -> None:
     """
     Apply styles to a feature (mutates input value).
     """
-    nothing_to_do = lambda _: {}
+    def nothing_to_do(_: Any) -> Dict:
+        return {}
+
     style = feature.setdefault("style", {})
 
     for prop_key, prop_value in feature.get("properties", {}).items():

@@ -56,7 +56,10 @@ def make_layers_data_list(geojson_paths: list[Path]) -> list[dict]:
 
 
 def generate_html(
-    geojson_paths: list[Path], title: str = None, ext_css: Path = None, ext_js: Path = None
+    geojson_paths: list[Path],
+    title: str | None = None,
+    ext_css: Path | None = None,
+    ext_js: Path | None = None,
 ) -> str:
     layers_data = make_layers_data_list(geojson_paths)
 
