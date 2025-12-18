@@ -4,11 +4,12 @@ import gettext
 import locale
 from pathlib import Path
 
-# Global translator
 _translator: gettext.NullTranslations = None  # type: ignore
 
 
-def setup_i18n(domain: str = "geocmp", localedir: Path | None = None) -> None:
+def setup_i18n(
+    domain: str = "geocmp", localedir: Path | None = None, lang: str | None = None
+) -> None:
     """
     Setup internationalization.
 
@@ -22,11 +23,12 @@ def setup_i18n(domain: str = "geocmp", localedir: Path | None = None) -> None:
         # Default locale directory relative to package
         localedir = Path(__file__).parent.parent.parent / "locales"
 
-    # Try to get system locale
-    try:
-        lang, _ = locale.getdefaultlocale()
-    except Exception:
-        lang = "en_US"
+    if lang is None:
+        try:
+            # Try to get system locale
+            lang, _ = locale.getdefaultlocale()
+        except Exception:
+            lang = "en_US"
 
     # Fallback to English if locale not found
     try:

@@ -19,6 +19,7 @@ def update_styles(feature: Dict[str, Any]) -> None:
     """
     Apply styles to a feature (mutates input value).
     """
+
     def nothing_to_do(_: Any) -> Dict:
         return {}
 
