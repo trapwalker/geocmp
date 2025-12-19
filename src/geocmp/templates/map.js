@@ -239,9 +239,19 @@
 					nameSpan.className = 'layer-name';
 					nameSpan.textContent = layerInfo.name;
 
+					// Delete button
+					const deleteBtn = document.createElement('button');
+					deleteBtn.className = 'layer-delete';
+					deleteBtn.innerHTML = '×';
+					deleteBtn.title = 'Remove layer';
+					deleteBtn.addEventListener('click', (e) => {
+						e.stopPropagation();
+						removeLayer(index, item);
+					});
+
 					// Click on item switches to layer
 					item.addEventListener('click', (e) => {
-						if (e.target !== checkbox) {
+						if (e.target !== checkbox && e.target !== deleteBtn) {
 							switchLayer(index);
 						}
 					});
@@ -249,6 +259,7 @@
 					item.appendChild(hotkeySpan);
 					item.appendChild(checkbox);
 					item.appendChild(nameSpan);
+					item.appendChild(deleteBtn);
 					list.appendChild(item);
 				});
 
@@ -290,6 +301,61 @@
 				if (enabledLayers.has(nextIndex) && layers[nextIndex]) {
 					switchLayer(nextIndex);
 				}
+			};
+
+			// Remove layer from map and UI
+			const removeLayer = (index, itemElement) => {
+				// Remove layer from map
+				if (layers[index]) {
+					map.removeLayer(layers[index]);
+					layers[index] = null;
+				}
+
+				// Remove from enabled layers set
+				enabledLayers.delete(index);
+
+				// Remove DOM element
+				itemElement.remove();
+
+				// If this was the active layer, switch to another
+				if (index === currentLayerIndex) {
+					// Find first available layer
+					let newIndex = -1;
+					for (let i = 0; i < layers.length; i++) {
+						if (layers[i] && enabledLayers.has(i)) {
+							newIndex = i;
+							break;
+						}
+					}
+
+					if (newIndex !== -1) {
+						switchLayer(newIndex);
+					} else {
+						// No layers left, clear info
+						const infoDiv = document.getElementById('info');
+						if (infoDiv) {
+							infoDiv.innerHTML = '<strong>No layers</strong>';
+						}
+					}
+				}
+
+				// Update hotkey numbers for remaining items
+				updateHotkeyNumbers();
+			};
+
+			// Update hotkey numbers in layer list
+			const updateHotkeyNumbers = () => {
+				const items = document.querySelectorAll('.layer-item');
+				let visibleIndex = 0;
+
+				items.forEach((item) => {
+					const hotkeySpan = item.querySelector('.layer-hotkey');
+					if (hotkeySpan) {
+						const hotkey = visibleIndex < 9 ? visibleIndex + 1 : (visibleIndex === 9 ? 0 : '');
+						hotkeySpan.textContent = hotkey;
+						visibleIndex++;
+					}
+				});
 			};
 
 			// Update data layer opacity
