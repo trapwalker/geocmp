@@ -18,6 +18,9 @@ from .html_maker import generate_html
 logger = logging.getLogger(__name__)
 
 ITEMDIV = "\n\t"
+TEMP_FILE_PREFIX = "geocmp_"
+TEMP_FILE_SUFFIX = ".html"
+TEMP_FILE_PATTERN = f"{TEMP_FILE_PREFIX}*{TEMP_FILE_SUFFIX}"
 
 setup_i18n()
 app = typer.Typer(help=_("Geocmp utility for compare GIS-files on the map"))
@@ -94,7 +97,7 @@ def main(
             logger.debug(_("Saving result to file: %s"), out)
         elif open_browser:
             with tempfile.NamedTemporaryFile(
-                mode="w", suffix=".html", prefix="geocmp_", delete=False
+                mode="w", suffix=TEMP_FILE_SUFFIX, prefix=TEMP_FILE_PREFIX, delete=False
             ) as temp_file:
                 out = Path(temp_file.name)
             logger.debug(_("Saving to temporary file: %s"), out)
@@ -113,6 +116,59 @@ def main(
         raise typer.Exit(code=130)
     except Exception as e:
         print(_("Fatal error: %s") % e, file=sys.stderr)
+        if verbose:
+            traceback.print_exc()
+        raise typer.Exit(code=2)
+
+
+@app.command(help=_("Remove all temporary files created by geocmp"))
+def clean(
+    verbose: bool = typer.Option(False, "--verbose", "-v", help=_("Enable verbose logging")),
+    dry_run: bool = typer.Option(False, "--dry-run", "-n", help=_("Show what would be deleted without deleting")),
+) -> None:
+    """Clean up temporary files created by geocmp.
+
+    Note: The user-facing help text is localized via @app.command(help=...).
+    This docstring is for code documentation only.
+    """
+    setup_logging(verbose)
+
+    temp_dir = Path(tempfile.gettempdir())
+    pattern = TEMP_FILE_PATTERN
+
+    try:
+        temp_files = list(temp_dir.glob(pattern))
+
+        if not temp_files:
+            print(_("No temporary files found"))
+            return
+
+        print(_("Found %d temporary file(s):") % len(temp_files))
+        for temp_file in temp_files:
+            file_size = temp_file.stat().st_size
+            print(f"  {temp_file.name} ({file_size:,} bytes)")
+
+        if dry_run:
+            print(_("\nDry run mode - no files deleted"))
+            return
+
+        deleted_count = 0
+        total_size = 0
+
+        for temp_file in temp_files:
+            try:
+                file_size = temp_file.stat().st_size
+                temp_file.unlink()
+                deleted_count += 1
+                total_size += file_size
+                logger.debug(_("Deleted: %s"), temp_file)
+            except Exception as e:
+                logger.warning(_("Failed to delete %s: %s"), temp_file, e)
+
+        print(_("\nDeleted %d file(s), freed %s bytes") % (deleted_count, f"{total_size:,}"))
+
+    except Exception as e:
+        print(_("Error during cleanup: %s") % e, file=sys.stderr)
         if verbose:
             traceback.print_exc()
         raise typer.Exit(code=2)

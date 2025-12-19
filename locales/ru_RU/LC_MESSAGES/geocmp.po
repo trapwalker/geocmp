@@ -90,3 +90,31 @@ msgstr "Некорректный формат GeoJSON: %s"
 # geojson_tools.py
 msgid "Cannot process style parameter %s=%r: %s"
 msgstr "Не удаётся обработать параметр стиля %s=%r: %s"
+
+# cli.py - clean command
+msgid "Remove all temporary files created by geocmp"
+msgstr "Удалить все временные файлы, созданные geocmp"
+
+msgid "Show what would be deleted without deleting"
+msgstr "Показать, что будет удалено, без фактического удаления"
+
+msgid "No temporary files found"
+msgstr "Временные файлы не найдены"
+
+msgid "Found %d temporary file(s):"
+msgstr "Найдено временных файлов: %d"
+
+msgid "\nDry run mode - no files deleted"
+msgstr "\nРежим пробного запуска - файлы не удалены"
+
+msgid "Deleted: %s"
+msgstr "Удалено: %s"
+
+msgid "Failed to delete %s: %s"
+msgstr "Не удалось удалить %s: %s"
+
+msgid "\nDeleted %d file(s), freed %s bytes"
+msgstr "\nУдалено файлов: %d, освобождено байт: %s"
+
+msgid "Error during cleanup: %s"
+msgstr "Ошибка при очистке: %s"
