@@ -1,0 +1,46 @@
+/* Пример пользовательских стилей для geocmp */
+
+/* Увеличить размер информационной панели */
+#info {
+    max-width: 400px;
+    font-size: 14px;
+    border: 2px solid #4CAF50;
+}
+
+/* Добавить градиент активному слою */
+.layer-item.active {
+    background: linear-gradient(135deg, #4CAF50 0%, #45a049 100%);
+}
+
+/* Изменить цвет номера горячей клавиши */
+.layer-hotkey {
+    background: #FF9800;
+}
+
+/* Стилизация кнопки настроек */
+.leaflet-control-settings {
+    font-size: 20px;
+}
+
+/* Улучшить видимость слайдеров */
+.opacity-slider {
+    height: 8px;
+    border-radius: 4px;
+}
+
+.opacity-slider::-webkit-slider-thumb {
+    width: 18px;
+    height: 18px;
+    background: #4CAF50;
+    cursor: pointer;
+    border-radius: 50%;
+}
+
+.opacity-slider::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background: #4CAF50;
+    cursor: pointer;
+    border-radius: 50%;
+    border: none;
+}

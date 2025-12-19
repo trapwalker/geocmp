@@ -433,7 +433,37 @@
 					event.preventDefault(); // Prevent space from scrolling page
 					switchToNextLayer();
 				}
+				// I (Russian: Ш) to toggle info panel
+				else if (key === 'i' || key === 'I' || key === 'ш' || key === 'Ш') {
+					const infoDiv = document.getElementById('info');
+					if (infoDiv) {
+						infoDiv.style.display = infoDiv.style.display === 'none' ? 'block' : 'none';
+					}
+				}
+				// H (Russian: Р) to show help
+				else if (key === 'h' || key === 'H' || key === 'р' || key === 'Р') {
+					event.preventDefault();
+					alert(
+						'Keyboard shortcuts / Горячие клавиши:\n\n' +
+						'1-9, 0      : Switch to layer 1-10 / Переключение на слой 1-10\n' +
+						'T, E, Space : Next enabled layer / Следующий активный слой\n' +
+						'I           : Toggle info panel / Скрыть/показать информационную панель\n' +
+						'H           : Show this help / Показать эту справку\n' +
+						'⚙ (button)  : Base layer settings / Настройки подложки'
+					);
+				}
 			});
+
+			// Log keyboard shortcuts to console
+			setTimeout(() => {
+				console.log('%c=== Geocmp - Keyboard Shortcuts ===', 'color: #4CAF50; font-weight: bold; font-size: 14px');
+				console.log('  1-9, 0      : Switch to layer 1-10');
+				console.log('  T, E, Space : Next enabled layer');
+				console.log('  I           : Toggle info panel');
+				console.log('  H           : Show help');
+				console.log('  ⚙ (button)  : Base layer settings');
+				console.log('%c===================================', 'color: #4CAF50');
+			}, 1000);
 
 			// Initialize UI
 			createBaseLayerControl();

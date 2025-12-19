@@ -69,8 +69,8 @@ def generate_html(
     return TEMPLATE_HTML.read_text(encoding="utf-8").format(
         title=title or " vs ".join(layers_data["name"] for layers_data in layers_data),
         css=TEMPLATE_CSS.read_text(encoding="utf-8"),
-        ext_css=ext_css and ext_css.read_text(encoding="utf-8") or "",  # TODO: add to template
+        ext_css=ext_css.read_text(encoding="utf-8") if ext_css else "",
         js=TEMPLATE_JS.read_text(encoding="utf-8"),
-        ext_js=ext_js and ext_js.read_text(encoding="utf-8") or "",  # TODO: add to template
+        ext_js=ext_js.read_text(encoding="utf-8") if ext_js else "",
         layers_json=json.dumps(layers_data, ensure_ascii=False, separators=(",", ":")),
     )
