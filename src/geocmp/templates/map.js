@@ -1,200 +1,230 @@
-		// Функция инициализации карты с переключением слоев
+		// Initialize map with layer switching functionality
 		function initMapWithLayers(layersData) {
-			// Парсим координаты из URL
-			const params = new URLSearchParams(window.location.hash.substring(1));
-			const lat = parseFloat(params.get('lat')) || 55.75;
-			const lng = parseFloat(params.get('lng')) || 37.6;
-			const zoom = parseInt(params.get('zoom')) || 10;
+			// Parse coordinates from URL hash
+			const parseUrlParams = () => {
+				const params = new URLSearchParams(window.location.hash.substring(1));
+				return {
+					lat: parseFloat(params.get('lat')) || 55.75,
+					lng: parseFloat(params.get('lng')) || 37.6,
+					zoom: parseInt(params.get('zoom')) || 10
+				};
+			};
 
-			// Создаем карту
-			let map = L.map('map', {maxZoom: 20}).setView([lat, lng], zoom);
+			const {lat, lng, zoom} = parseUrlParams();
 
-			// Добавляем слой OSM
+			// Create map with OSM tiles
+			const map = L.map('map', {maxZoom: 20}).setView([lat, lng], zoom);
 			L.tileLayer('https://{s}.tile.osm.org/{z}/{x}/{y}.png', {
 				attribution: '&copy; <a href="https://osm.org/copyright">OpenStreetMap</a> contributors'
 			}).addTo(map);
 
-			// Создаем отдельную панель для маркеров, чтобы они были поверх залитых полигонов
+			// Create marker pane (above polygons)
 			try {
 				map.createPane('markerPane');
-				map.getPane('markerPane').style.zIndex = 650; // выше, чем pane векторных слоев
-			} catch (e) {
-				// ignore if pane exists or create fails
-			}
+				map.getPane('markerPane').style.zIndex = 650;
+			} catch (e) { /* ignore if exists */ }
 
-			// Массив для хранения слоев
-			let layers = [];
-			let currentLayerIndex = 0;
-			let tabsContainer = document.getElementById('tabs');
-
-			// Обновляем URL при движении карты
-			function updateUrlCoordinates() {
+			// Update URL on map movement
+			const updateUrlCoordinates = () => {
 				const center = map.getCenter();
 				const z = map.getZoom();
-				const newHash = `#lat=${center.lat.toFixed(5)}&lng=${center.lng.toFixed(5)}&zoom=${z}`;
-				window.history.replaceState(null, null, newHash);
-			}
+				window.history.replaceState(null, null,
+					`#lat=${center.lat.toFixed(5)}&lng=${center.lng.toFixed(5)}&zoom=${z}`);
+			};
 
 			map.on('moveend', updateUrlCoordinates);
 			map.on('zoomend', updateUrlCoordinates);
 
-			// Создаем вкладки для всех слоев
-			function createTabs() {
-				layersData.forEach(function(layerInfo, index) {
-					var tab = document.createElement('div');
-					tab.className = 'tab' + (index === 0 ? ' active' : '');
-					tab.textContent = layerInfo.name;
-					tab.setAttribute('data-layer', index);
-					tab.addEventListener('click', function() {
-						switchLayer(index);
+			// State
+			const layers = [];
+			let currentLayerIndex = 0;
+			const enabledLayers = new Set(layersData.map((_, i) => i)); // All enabled by default
+
+			// Create layer selector widget with checkboxes
+			const createLayerSelector = () => {
+				const container = document.getElementById('tabs');
+				const list = document.createElement('div');
+				list.className = 'layer-list';
+
+				layersData.forEach((layerInfo, index) => {
+					const item = document.createElement('label');
+					item.className = 'layer-item';
+					if (index === 0) item.classList.add('active');
+
+					// Hotkey number (1-9, 0 for 10th)
+					const hotkey = index < 9 ? index + 1 : (index === 9 ? 0 : '');
+					const hotkeySpan = document.createElement('span');
+					hotkeySpan.className = 'layer-hotkey';
+					hotkeySpan.textContent = hotkey;
+
+					// Checkbox
+					const checkbox = document.createElement('input');
+					checkbox.type = 'checkbox';
+					checkbox.checked = true;
+					checkbox.addEventListener('change', (e) => {
+						if (e.target.checked) {
+							enabledLayers.add(index);
+						} else {
+							enabledLayers.delete(index);
+							// Switch to next enabled layer if current is disabled
+							if (index === currentLayerIndex && enabledLayers.size > 0) {
+								switchToNextLayer();
+							}
+						}
 					});
-					tabsContainer.appendChild(tab);
+
+					// Layer name
+					const nameSpan = document.createElement('span');
+					nameSpan.className = 'layer-name';
+					nameSpan.textContent = layerInfo.name;
+
+					// Click on item switches to layer
+					item.addEventListener('click', (e) => {
+						if (e.target !== checkbox) {
+							switchLayer(index);
+						}
+					});
+
+					item.appendChild(hotkeySpan);
+					item.appendChild(checkbox);
+					item.appendChild(nameSpan);
+					list.appendChild(item);
 				});
-			}
 
-			// Функция переключения слоя
-			function switchLayer(index) {
-				if (index < 0 || index >= layers.length || !layers[index]) {
-					return;
-				}
+				container.appendChild(list);
+			};
 
-				// Скрываем все слои
-				layers.forEach(function(layer) {
-					if (layer) {
-						map.removeLayer(layer);
-					}
-				});
+			// Switch to specific layer
+			const switchLayer = (index) => {
+				if (index < 0 || index >= layers.length || !layers[index]) return;
 
-				// Показываем выбранный слой
+				// Hide all layers
+				layers.forEach(layer => layer && map.removeLayer(layer));
+
+				// Show selected layer
 				map.addLayer(layers[index]);
 
-				// Обновляем активную вкладку
-				document.querySelectorAll('.tab').forEach(function(tab, i) {
-					if (i === index) {
-						tab.classList.add('active');
-					} else {
-						tab.classList.remove('active');
-					}
+				// Update active state in UI
+				document.querySelectorAll('.layer-item').forEach((item, i) => {
+					item.classList.toggle('active', i === index);
 				});
 
-				// Обновляем инфо
-				updateInfo(index);
 				currentLayerIndex = index;
-			}
+				updateInfo(index);
+			};
 
-			// Функция циклического переключения слоев
-			function switchToNextLayer() {
-				var nextIndex = (currentLayerIndex + 1) % layers.length;
-				// Пропускаем незагруженные слои
-				for (var i = 0; i < layers.length; i++) {
-					if (layers[nextIndex]) {
-						switchLayer(nextIndex);
-						return;
-					}
+			// Switch to next enabled layer (cycle)
+			const switchToNextLayer = () => {
+				if (enabledLayers.size === 0) return;
+
+				let nextIndex = (currentLayerIndex + 1) % layers.length;
+				let attempts = 0;
+
+				while (!enabledLayers.has(nextIndex) && attempts < layers.length) {
 					nextIndex = (nextIndex + 1) % layers.length;
+					attempts++;
 				}
-			}
 
-			// Обновляем информацию о слое
-			function updateInfo(index) {
-				if (index < 0 || index >= layersData.length) return;
+				if (enabledLayers.has(nextIndex) && layers[nextIndex]) {
+					switchLayer(nextIndex);
+				}
+			};
+
+			// Update layer info display
+			const updateInfo = (index) => {
 				const infoDiv = document.getElementById('info');
-				if (infoDiv) {
-					const layerInfo = layersData[index];
-					infoDiv.innerHTML = '<strong>' + layerInfo.name + '</strong><br>' +
-						'Источник: ' + layerInfo.source + '<br>' +
-						'Объектов: ' + (layerInfo.features || 0);
-				}
-			}
+				if (!infoDiv || index < 0 || index >= layersData.length) return;
 
-			// Загружаем все слои
-			layersData.forEach(function(layerInfo, index) {
+				const layerInfo = layersData[index];
+				infoDiv.innerHTML = `
+					<strong>${layerInfo.name}</strong><br>
+					Источник: ${layerInfo.source}<br>
+					Объектов: ${layerInfo.features || 0}
+				`;
+			};
+
+			// Extract style properties from feature
+			const getFeatureStyle = (feature) => {
+				if (feature.style) return feature.style;
+
+				const props = feature.properties || {};
+				const getProperty = (...keys) => {
+					for (const key of keys) {
+						if (props[key] !== undefined) return props[key];
+					}
+					return null;
+				};
+
+				const stroke = getProperty('stroke', 'stroke-color', 'strokeColor', 'color', 'marker-color') || '#3388ff';
+				const fill = getProperty('fill', 'fill-color', 'fillColor', 'marker-color') || stroke;
+				const fillOpacity = parseFloat(getProperty('fill-opacity', 'fillOpacity')) || 0.5;
+				const weight = parseFloat(getProperty('stroke-width', 'strokeWidth')) || 2;
+
+				return {
+					color: stroke,
+					weight: isNaN(weight) ? 2 : weight,
+					opacity: 0.8,
+					fillColor: fill,
+					fillOpacity: isNaN(fillOpacity) ? 0.5 : fillOpacity
+				};
+			};
+
+			// Create point marker with custom style
+			const createPointMarker = (feature, latlng) => {
+				const props = feature.properties || {};
+				const getProperty = (...keys) => {
+					for (const key of keys) {
+						if (props[key] !== undefined) return props[key];
+					}
+					return null;
+				};
+
+				const color = getProperty('marker-color', 'markerColor', 'stroke', 'stroke-color', 'color') || '#3388ff';
+				const fillColor = getProperty('fill', 'fill-color', 'fillColor') || color;
+
+				let radius = 6;
+				const markerSize = props['marker-size'];
+				if (markerSize === 'large') radius = 12;
+				else if (markerSize === 'small') radius = 4;
+				else if (props.radius) radius = parseFloat(props.radius) || 6;
+
+				const weight = parseFloat(getProperty('stroke-width', 'strokeWidth')) || 1;
+				const fillOpacity = parseFloat(getProperty('fill-opacity', 'fillOpacity')) || 0.9;
+
+				return L.circleMarker(latlng, {
+					radius,
+					color,
+					fillColor,
+					pane: 'markerPane',
+					weight: isNaN(weight) ? 1 : weight,
+					fillOpacity: isNaN(fillOpacity) ? 0.9 : fillOpacity
+				});
+			};
+
+			// Create popup content from properties
+			const createPopup = (properties) => {
+				const rows = Object.entries(properties)
+					.map(([key, value]) => `<tr><td><strong>${key}</strong></td><td>${value}</td></tr>`)
+					.join('');
+				return `<table class="simple-table">${rows}</table>`;
+			};
+
+			// Load all layers
+			layersData.forEach((layerInfo, index) => {
 				try {
-					// Подсчитаем ожидаемое число архитектурных форм типа Point в данных (для отладки)
-					var expectedArchPoints = 0;
-					try {
-						if (layerInfo && layerInfo.data && layerInfo.data.features) {
-							layerInfo.data.features.forEach(function(f) {
-								if (f && f.properties && f.properties.type === 'architecture_form' && f.geometry && f.geometry.type === 'Point') expectedArchPoints++;
-							});
-						}
-					} catch (e) { /* ignore */ }
-					var geojson = L.geoJson(layerInfo.data, {
-						// Для точек используем circleMarker, чтобы можно было менять цвет
-						pointToLayer: function(feature, latlng) {
-							var props = feature.properties || {};
-							var color = props['marker-color'] || props['markerColor'] || props['stroke'] || props['stroke-color'] || props['color'] || '#3388ff';
-							var fillColor = props['fill'] || props['fill-color'] || props['fillColor'] || color;
-							var radius = 6;
-							if (props['marker-size']) {
-								if (props['marker-size'] === 'large') radius = 12;
-								else if (props['marker-size'] === 'small') radius = 4;
-							} else if (props['radius']) {
-								var r = parseFloat(props['radius']);
-								if (!isNaN(r)) radius = r;
-							}
-							var weight = (props['stroke-width'] !== undefined) ? parseFloat(props['stroke-width']) : ((props['strokeWidth'] !== undefined) ? parseFloat(props['strokeWidth']) : 1);
-							var fillOpacity = (props['fill-opacity'] !== undefined) ? parseFloat(props['fill-opacity']) : ((props['fillOpacity'] !== undefined) ? parseFloat(props['fillOpacity']) : 0.9);
-							return L.circleMarker(latlng, {
-								radius: radius,
-								color: color,
-								fillColor: fillColor,
-								pane: 'markerPane',
-								weight: isNaN(weight) ? 1 : weight,
-								fillOpacity: isNaN(fillOpacity) ? 0.9 : fillOpacity
-							});
-						},
-						style: function(feature) {
-							// Используем встроенные стили из feature, если есть
-							if (feature.style) {
-								return feature.style;
-							}
-							// Попробуем вывести стили из свойств (marker-color, fill, stroke, fill-opacity, stroke-width)
-							var props = feature.properties || {};
-							var stroke = props['stroke'] || props['stroke-color'] || props['strokeColor'] || props['color'] || props['marker-color'] || '#3388ff';
-							var fill = props['fill'] || props['fill-color'] || props['fillColor'] || props['marker-color'] || stroke;
-							var fillOpacity = (props['fill-opacity'] !== undefined) ? parseFloat(props['fill-opacity']) : ((props['fillOpacity'] !== undefined) ? parseFloat(props['fillOpacity']) : 0.5);
-							var weight = (props['stroke-width'] !== undefined) ? parseFloat(props['stroke-width']) : ((props['strokeWidth'] !== undefined) ? parseFloat(props['strokeWidth']) : 2);
-							return {
-								color: stroke,
-								weight: isNaN(weight) ? 2 : weight,
-								opacity: 0.8,
-								fillColor: fill,
-								fillOpacity: isNaN(fillOpacity) ? 0.5 : fillOpacity
-							};
-						},
-						onEachFeature: function (feature, layer) {
-							layer.bindPopup(
-								'<table class="simple-table">' +
-								Object.entries(feature.properties).map(([key, value]) =>
-									'<tr><td><strong>' + key + '</strong></td><td>' + value + '</td></tr>'
-								).join('') +
-								'</table>'
-							);
+					const geojson = L.geoJson(layerInfo.data, {
+						pointToLayer: createPointMarker,
+						style: getFeatureStyle,
+						onEachFeature: (feature, layer) => {
+							layer.bindPopup(createPopup(feature.properties));
 						}
 					});
+
 					layers[index] = geojson;
 
-					// Количество созданных layer'ов типа Point / CircleMarker в этом слое (отладочный лог)
-					try {
-						var createdArchMarkers = 0;
-						geojson.eachLayer(function(l) {
-							if (l && l.feature && l.feature.properties && l.feature.properties.type === 'architecture_form') {
-								// Проверяем, является ли слой circleMarker (vector) или Marker (icon)
-								if (l instanceof L.CircleMarker) createdArchMarkers++;
-							}
-						});
-						console.log('[debug] layer', index, layerInfo.name, 'expectedArchPoints=', expectedArchPoints, 'createdArchMarkers=', createdArchMarkers);
-					} catch (e) {
-						console.log('[debug] layer', index, layerInfo.name, 'error counting markers', e);
-					}
-
-					// Центрируем карту по содержимому слоя
-					if (geojson.getBounds && geojson.getBounds().isValid()) {
+					// Fit map to first layer bounds
+					if (index === 0 && geojson.getBounds && geojson.getBounds().isValid()) {
 						map.fitBounds(geojson.getBounds(), {padding: [20, 20]});
-					}
-
-					if (index === 0) {
 						switchLayer(0);
 					}
 				} catch (e) {
@@ -203,18 +233,24 @@
 				}
 			});
 
-			// Обработчик нажатия клавиш
-			document.addEventListener('keydown', function(event) {
-				var key = event.key;
+			// Keyboard shortcuts
+			document.addEventListener('keydown', (event) => {
+				const key = event.key;
+
+				// Numbers 1-9, 0 for 10th layer
 				if (key >= '0' && key <= '9') {
-					var layerIndex = parseInt(key) - 1;
-					if (layerIndex < 0) layerIndex = 9;
-					if (layerIndex < layers.length && layers[layerIndex]) switchLayer(layerIndex);
-				} else if (key === 't' || key === 'T' || key === 'е' || key === 'Е') {
+					const layerIndex = key === '0' ? 9 : parseInt(key) - 1;
+					if (layerIndex < layers.length && layers[layerIndex]) {
+						switchLayer(layerIndex);
+					}
+				}
+				// T, E (Russian), or Space to cycle through enabled layers
+				else if (key === 't' || key === 'T' || key === 'е' || key === 'Е' || key === ' ') {
+					event.preventDefault(); // Prevent space from scrolling page
 					switchToNextLayer();
 				}
 			});
 
-			// Создаем вкладки при загрузке страницы
-			createTabs();
+			// Initialize UI
+			createLayerSelector();
 		}
