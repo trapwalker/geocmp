@@ -194,6 +194,21 @@
 				});
 			};
 
+			// Update hotkey numbers in layer list based on visible order
+			const updateHotkeyNumbers = () => {
+				const items = document.querySelectorAll('.layer-item');
+				let visibleIndex = 0;
+
+				items.forEach((item) => {
+					const hotkeySpan = item.querySelector('.layer-hotkey');
+					if (hotkeySpan) {
+						const hotkey = visibleIndex < 9 ? visibleIndex + 1 : (visibleIndex === 9 ? 0 : '');
+						hotkeySpan.textContent = hotkey;
+						visibleIndex++;
+					}
+				});
+			};
+
 			// Create layer selector widget with checkboxes
 			const createLayerSelector = () => {
 				const container = document.getElementById('tabs');
@@ -208,27 +223,28 @@
 				list.className = 'layer-list';
 
 				layersData.forEach((layerInfo, index) => {
-					const item = document.createElement('label');
+					const item = document.createElement('div');
 					item.className = 'layer-item';
+					item.dataset.layerIndex = index; // Store layer index in data attribute
 					if (index === 0) item.classList.add('active');
 
-					// Hotkey number (1-9, 0 for 10th)
-					const hotkey = index < 9 ? index + 1 : (index === 9 ? 0 : '');
+					// Hotkey number (will be set by updateHotkeyNumbers)
 					const hotkeySpan = document.createElement('span');
 					hotkeySpan.className = 'layer-hotkey';
-					hotkeySpan.textContent = hotkey;
+					hotkeySpan.textContent = '';
 
 					// Checkbox
 					const checkbox = document.createElement('input');
 					checkbox.type = 'checkbox';
 					checkbox.checked = true;
 					checkbox.addEventListener('change', (e) => {
+						const idx = parseInt(e.target.closest('.layer-item').dataset.layerIndex);
 						if (e.target.checked) {
-							enabledLayers.add(index);
+							enabledLayers.add(idx);
 						} else {
-							enabledLayers.delete(index);
+							enabledLayers.delete(idx);
 							// Switch to next enabled layer if current is disabled
-							if (index === currentLayerIndex && enabledLayers.size > 0) {
+							if (idx === currentLayerIndex && enabledLayers.size > 0) {
 								switchToNextLayer();
 							}
 						}
@@ -246,13 +262,15 @@
 					deleteBtn.title = 'Remove layer';
 					deleteBtn.addEventListener('click', (e) => {
 						e.stopPropagation();
-						removeLayer(index, item);
+						const idx = parseInt(e.target.closest('.layer-item').dataset.layerIndex);
+						removeLayer(idx, item);
 					});
 
 					// Click on item switches to layer
 					item.addEventListener('click', (e) => {
 						if (e.target !== checkbox && e.target !== deleteBtn) {
-							switchLayer(index);
+							const idx = parseInt(item.dataset.layerIndex);
+							switchLayer(idx);
 						}
 					});
 
@@ -264,6 +282,9 @@
 				});
 
 				container.appendChild(list);
+
+				// Update hotkey numbers based on visible order
+				updateHotkeyNumbers();
 			};
 
 			// Switch to specific layer
@@ -277,8 +298,9 @@
 				map.addLayer(layers[index]);
 
 				// Update active state in UI
-				document.querySelectorAll('.layer-item').forEach((item, i) => {
-					item.classList.toggle('active', i === index);
+				document.querySelectorAll('.layer-item').forEach((item) => {
+					const itemIndex = parseInt(item.dataset.layerIndex);
+					item.classList.toggle('active', itemIndex === index);
 				});
 
 				currentLayerIndex = index;
@@ -341,21 +363,6 @@
 
 				// Update hotkey numbers for remaining items
 				updateHotkeyNumbers();
-			};
-
-			// Update hotkey numbers in layer list
-			const updateHotkeyNumbers = () => {
-				const items = document.querySelectorAll('.layer-item');
-				let visibleIndex = 0;
-
-				items.forEach((item) => {
-					const hotkeySpan = item.querySelector('.layer-hotkey');
-					if (hotkeySpan) {
-						const hotkey = visibleIndex < 9 ? visibleIndex + 1 : (visibleIndex === 9 ? 0 : '');
-						hotkeySpan.textContent = hotkey;
-						visibleIndex++;
-					}
-				});
 			};
 
 			// Update data layer opacity
@@ -483,14 +490,16 @@
 				}
 			});
 
-			// Keyboard shortcuts
+			// Keyboard shortcuts - work by visible order in DOM, not by array index
 			document.addEventListener('keydown', (event) => {
 				const key = event.key;
 
-				// Numbers 1-9, 0 for 10th layer
+				// Numbers 1-9, 0 for 10th visible layer
 				if (key >= '0' && key <= '9') {
-					const layerIndex = key === '0' ? 9 : parseInt(key) - 1;
-					if (layerIndex < layers.length && layers[layerIndex]) {
+					const visiblePosition = key === '0' ? 9 : parseInt(key) - 1;
+					const items = Array.from(document.querySelectorAll('.layer-item'));
+					if (items[visiblePosition]) {
+						const layerIndex = parseInt(items[visiblePosition].dataset.layerIndex);
 						switchLayer(layerIndex);
 					}
 				}
@@ -520,6 +529,167 @@
 				}
 			});
 
+			// Add new layer from GeoJSON data
+			const addLayer = (geojsonData, fileName) => {
+				try {
+					// Create layer info
+					const layerInfo = {
+						name: fileName,
+						source: fileName,
+						features: geojsonData.features ? geojsonData.features.length : 0,
+						data: geojsonData
+					};
+
+					// Create Leaflet layer
+					const geojson = L.geoJson(geojsonData, {
+						pointToLayer: createPointMarker,
+						style: getFeatureStyle,
+						onEachFeature: (feature, layer) => {
+							layer.bindPopup(createPopup(feature.properties));
+						}
+					});
+
+					// Add to arrays - find first available slot or use end
+					let newIndex = layers.findIndex(layer => layer === null);
+					if (newIndex === -1) {
+						// No free slots, add to end
+						newIndex = layers.length;
+						layers.push(geojson);
+						layersData.push(layerInfo);
+					} else {
+						// Reuse deleted slot
+						layers[newIndex] = geojson;
+						layersData[newIndex] = layerInfo;
+					}
+					enabledLayers.add(newIndex);
+
+					// Add to UI
+					const container = document.getElementById('tabs');
+					const list = container.querySelector('.layer-list');
+
+					const item = document.createElement('div');
+					item.className = 'layer-item';
+					item.dataset.layerIndex = newIndex; // Store layer index in data attribute
+
+					// Hotkey number (will be set by updateHotkeyNumbers)
+					const hotkeySpan = document.createElement('span');
+					hotkeySpan.className = 'layer-hotkey';
+					hotkeySpan.textContent = '';
+
+					// Checkbox
+					const checkbox = document.createElement('input');
+					checkbox.type = 'checkbox';
+					checkbox.checked = true;
+					checkbox.addEventListener('change', (e) => {
+						const idx = parseInt(e.target.closest('.layer-item').dataset.layerIndex);
+						if (e.target.checked) {
+							enabledLayers.add(idx);
+						} else {
+							enabledLayers.delete(idx);
+							if (idx === currentLayerIndex && enabledLayers.size > 0) {
+								switchToNextLayer();
+							}
+						}
+					});
+
+					// Layer name
+					const nameSpan = document.createElement('span');
+					nameSpan.className = 'layer-name';
+					nameSpan.textContent = fileName;
+
+					// Delete button
+					const deleteBtn = document.createElement('button');
+					deleteBtn.className = 'layer-delete';
+					deleteBtn.innerHTML = '×';
+					deleteBtn.title = 'Remove layer';
+					deleteBtn.addEventListener('click', (e) => {
+						e.stopPropagation();
+						const idx = parseInt(e.target.closest('.layer-item').dataset.layerIndex);
+						removeLayer(idx, item);
+					});
+
+					// Click on item switches to layer
+					item.addEventListener('click', (e) => {
+						if (e.target !== checkbox && e.target !== deleteBtn) {
+							const idx = parseInt(item.dataset.layerIndex);
+							switchLayer(idx);
+						}
+					});
+
+					item.appendChild(hotkeySpan);
+					item.appendChild(checkbox);
+					item.appendChild(nameSpan);
+					item.appendChild(deleteBtn);
+					list.appendChild(item);
+
+					// Update hotkey numbers for all items
+					updateHotkeyNumbers();
+
+					// Switch to new layer and fit bounds
+					if (geojson.getBounds && geojson.getBounds().isValid()) {
+						map.fitBounds(geojson.getBounds(), {padding: [20, 20]});
+					}
+					switchLayer(newIndex);
+
+					console.log(`✓ Loaded layer: ${fileName} (${layerInfo.features} features)`);
+				} catch (e) {
+					console.error('Failed to load GeoJSON:', e);
+					alert(`Failed to load ${fileName}:\n${e.message}`);
+				}
+			};
+
+			// Drag and drop support
+			const mapElement = document.getElementById('map');
+
+			mapElement.addEventListener('dragover', (e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				mapElement.style.opacity = '0.7';
+				mapElement.style.cursor = 'copy';
+			});
+
+			mapElement.addEventListener('dragleave', (e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				mapElement.style.opacity = '1';
+				mapElement.style.cursor = '';
+			});
+
+			mapElement.addEventListener('drop', (e) => {
+				e.preventDefault();
+				e.stopPropagation();
+				mapElement.style.opacity = '1';
+				mapElement.style.cursor = '';
+
+				const files = e.dataTransfer.files;
+
+				if (files.length === 0) return;
+
+				// Process each dropped file
+				for (let i = 0; i < files.length; i++) {
+					const file = files[i];
+
+					// Check if it's a JSON file
+					if (!file.name.match(/\.(geo)?json$/i)) {
+						alert(`Skipping ${file.name}: Only GeoJSON files are supported`);
+						continue;
+					}
+
+					// Read file
+					const reader = new FileReader();
+					reader.onload = (event) => {
+						try {
+							const geojsonData = JSON.parse(event.target.result);
+							addLayer(geojsonData, file.name);
+						} catch (e) {
+							console.error('Failed to parse JSON:', e);
+							alert(`Failed to parse ${file.name}:\n${e.message}`);
+						}
+					};
+					reader.readAsText(file);
+				}
+			});
+
 			// Log keyboard shortcuts to console
 			setTimeout(() => {
 				console.log('%c=== Geocmp - Keyboard Shortcuts ===', 'color: #4CAF50; font-weight: bold; font-size: 14px');
@@ -529,6 +699,8 @@
 				console.log('  H           : Show help');
 				console.log('  ⚙ (button)  : Base layer settings');
 				console.log('%c===================================', 'color: #4CAF50');
+				console.log('');
+				console.log('%c💡 Drag & drop GeoJSON files onto the map to add layers', 'color: #2196F3; font-style: italic');
 			}, 1000);
 
 			// Initialize UI
