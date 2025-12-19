@@ -1,0 +1,9 @@
+# Gettext translation files
+*.po linguist-language=PO
+*.pot linguist-language=PO
+
+# Documentation
+*.md linguist-documentation
+
+# Generated files
+*.mo binary
