@@ -532,9 +532,21 @@
 			// Add new layer from GeoJSON data
 			const addLayer = (geojsonData, fileName) => {
 				try {
+					// Make unique name if already exists
+					let uniqueName = fileName;
+					const existingNames = layersData.map(layer => layer ? layer.name : null).filter(n => n !== null);
+
+					if (existingNames.includes(fileName)) {
+						let counter = 1;
+						while (existingNames.includes(`${fileName} (${counter})`)) {
+							counter++;
+						}
+						uniqueName = `${fileName} (${counter})`;
+					}
+
 					// Create layer info
 					const layerInfo = {
-						name: fileName,
+						name: uniqueName,
 						source: fileName,
 						features: geojsonData.features ? geojsonData.features.length : 0,
 						data: geojsonData
@@ -595,7 +607,7 @@
 					// Layer name
 					const nameSpan = document.createElement('span');
 					nameSpan.className = 'layer-name';
-					nameSpan.textContent = fileName;
+					nameSpan.textContent = uniqueName;
 
 					// Delete button
 					const deleteBtn = document.createElement('button');
