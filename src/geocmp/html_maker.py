@@ -23,8 +23,12 @@ def make_layers_data_list(geojson_paths: list[Path]) -> list[dict]:
     """
     layers_data = []
 
-    common_path = Path(os.path.commonpath([p.as_posix() for p in geojson_paths]))
-    trimmed_paths = [p.relative_to(common_path) for p in geojson_paths]
+    # For single file, use just the name; for multiple files, trim common path
+    if len(geojson_paths) == 1:
+        trimmed_paths = [geojson_paths[0].name]
+    else:
+        common_path = Path(os.path.commonpath([p.as_posix() for p in geojson_paths]))
+        trimmed_paths = [p.relative_to(common_path) for p in geojson_paths]
 
     for geojson_path, trimmed_path in zip(geojson_paths, trimmed_paths):
         try:
