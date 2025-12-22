@@ -28,7 +28,7 @@ dev = [
 ]
 
 [project.scripts]
-geocmp = "geocmp.cli:app"
+geocmp = "geocmp.cli:cli_entry_point"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/geocmp"]
@@ -57,13 +57,6 @@ python_files = "test_*.py"
 python_classes = "Test*"
 python_functions = "test_*"
 addopts = "-v --cov=geocmp --cov-report=term-missing"
-
-
-[dependency-groups]
-dev = [
-    "pytest>=8.4.2",
-    "pytest-cov>=7.0.0",
-]
 
 [build-system]
 requires = ["hatchling"]

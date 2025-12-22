@@ -174,5 +174,24 @@ def clean(
         raise typer.Exit(code=2)
 
 
-if __name__ == "__main__":
+def cli_entry_point() -> None:
+    """
+    Main CLI entry point with backward compatibility.
+
+    Automatically inserts 'main' command if first argument is not a known command.
+    This allows using 'geocmp file.geojson' instead of 'geocmp main file.geojson'.
+    """
+    import sys
+
+    # For backward compatibility: if first arg is not a known command, insert "main"
+    # Known commands and options that should not trigger auto-insertion
+    known_args = {"main", "clean", "--help", "-h", "--install-completion", "--show-completion"}
+
+    if len(sys.argv) > 1 and sys.argv[1] not in known_args and not sys.argv[1].startswith("-"):
+        sys.argv.insert(1, "main")
+
     app()
+
+
+if __name__ == "__main__":
+    cli_entry_point()
