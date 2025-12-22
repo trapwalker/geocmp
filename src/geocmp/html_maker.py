@@ -45,7 +45,8 @@ def make_layers_data_list(geojson_paths: list[Path]) -> list[dict]:
             logger.warning(_("Invalid GeoJSON format: %s"), geojson_path)
             continue
 
-        map(geojson_tools.update_styles, geojson_data.get("features", []))
+        for feature in geojson_data.get("features", []):
+            geojson_tools.update_styles(feature)
 
         layers_data.append(
             {
@@ -67,14 +68,28 @@ def generate_html(
 ) -> str:
     layers_data = make_layers_data_list(geojson_paths)
 
-    if not layers_data:
-        raise ValueError("No geojson data found.")
+    # if not layers_data:
+    #     raise ValueError("No geojson data found.")
+
+    ext_css_data = ""
+    if ext_css:
+        try:
+            ext_css_data = ext_css.read_text(encoding="utf-8")
+        except Exception as e:
+            logger.warning(_("Cannot read %s: %s"), ext_css, e)
+
+    ext_js_data = ""
+    if ext_js:
+        try:
+            ext_js_data = ext_js.read_text(encoding="utf-8")
+        except Exception as e:
+            logger.warning(_("Cannot read %s: %s"), ext_js, e)
 
     return TEMPLATE_HTML.read_text(encoding="utf-8").format(
         title=title or " vs ".join(layers_data["name"] for layers_data in layers_data),
         css=TEMPLATE_CSS.read_text(encoding="utf-8"),
-        ext_css=ext_css.read_text(encoding="utf-8") if ext_css else "",
+        ext_css=ext_css_data,
         js=TEMPLATE_JS.read_text(encoding="utf-8"),
-        ext_js=ext_js.read_text(encoding="utf-8") if ext_js else "",
+        ext_js=ext_js_data,
         layers_json=json.dumps(layers_data, ensure_ascii=False, separators=(",", ":")),
     )
